@@ -1,0 +1,57 @@
+INCLUDES=-I./include/freetype/config -I./builds/unix -I./include
+
+OBJECTS=objs/ftsystem.o objs/ftbase.o objs/ftinit.o objs/autofit.o objs/ftbitmap.o objs/ftglyph.o objs/truetype.o objs/type1.o objs/cff.o objs/type1cid.o objs/pfr.o objs/type42.o objs/winfnt.o objs/ftgzip.o objs/ftlzw.o objs/pcf.o objs/psaux.o objs/psnames.o objs/pshinter.o objs/raster.o objs/sfnt.o objs/bdf.o objs/ftdebug.o objs/smooth.o
+
+SOURCES=src/base/ftinit.c src/autofit/autofit.c src/base/ftbitmap.c src/base/ftglyph.c src/truetype/truetype.c src/type1/type1.c src/cff/cff.c src/cid/type1cid.c src/pfr/pfr.c src/type42/type42.c src/winfonts/winfnt.c src/gzip/ftgzip.c src/lzw/ftlzw.c src/pcf/pcf.c src/psaux/psaux.c src/psnames/psnames.c src/pshinter/pshinter.c src/raster/raster.c src/sfnt/sfnt.c src/bdf/bdf.c src/base/ftdebug.c src/smooth/smooth.c
+
+CFLAGS=-fno-stack-protector -fno-exceptions -pie -fPIE -c -O2 -fPIC "-DFT_CONFIG_CONFIG_H=<ftconfig.h>" -DFT2_BUILD_LIBRARY "-DFT_CONFIG_MODULES_H=<ftmodule.h>" "-DFT_CONFIG_OPTIONS_H=<ftoption.h>"
+
+STATICLIB=l_static/libfreetype.a
+DYNAMICLIB=l_dynamic/libfreetype.so
+	
+
+$(OBJECTS): $(SOURCES)
+	gcc $(INCLUDES) -ansi $(CFLAGS) -DO_RDONLY=0 builds/unix/ftsystem.c -o objs/ftsystem.o
+	gcc $(INCLUDES) -I./src/base $(CFLAGS) src/base/ftbase.c -o objs/ftbase.o
+	gcc $(INCLUDES) $(CFLAGS) src/base/ftinit.c -o objs/ftinit.o
+	gcc $(INCLUDES) -I./src/autofit $(CFLAGS) src/autofit/autofit.c -o objs/autofit.o
+	gcc $(INCLUDES) -I./src/base $(CFLAGS) src/base/ftbitmap.c -o objs/ftbitmap.o
+	gcc $(INCLUDES) -I./src/base $(CFLAGS) src/base/ftglyph.c -o objs/ftglyph.o
+	gcc $(INCLUDES) -I./src/truetype $(CFLAGS) src/truetype/truetype.c -o objs/truetype.o
+	gcc $(INCLUDES) -I./src/type1 $(CFLAGS) src/type1/type1.c -o objs/type1.o
+	gcc $(INCLUDES) -I./src/cff $(CFLAGS) src/cff/cff.c -o objs/cff.o
+	gcc $(INCLUDES) -I./src/cid $(CFLAGS) src/cid/type1cid.c -o objs/type1cid.o
+	gcc $(INCLUDES) -I./src/pfr $(CFLAGS) src/pfr/pfr.c -o objs/pfr.o
+	gcc $(INCLUDES) -I./src/type42 $(CFLAGS) src/type42/type42.c -o objs/type42.o
+	gcc $(INCLUDES) -I./src/winfonts $(CFLAGS) src/winfonts/winfnt.c -o objs/winfnt.o
+	gcc $(INCLUDES) $(CFLAGS) src/gzip/ftgzip.c -o objs/ftgzip.o
+	gcc $(INCLUDES) -I./src/lzw $(CFLAGS) src/lzw/ftlzw.c -o objs/ftlzw.o
+	gcc $(INCLUDES) -I./src/pcf $(CFLAGS) src/pcf/pcf.c -o objs/pcf.o
+	gcc $(INCLUDES) -I./src/psaux $(CFLAGS) src/psaux/psaux.c -o objs/psaux.o
+	gcc $(INCLUDES) -I./src/psnames $(CFLAGS) src/psnames/psnames.c -o objs/psnames.o
+	gcc $(INCLUDES) -I./src/pshinter $(CFLAGS) src/pshinter/pshinter.c -o objs/pshinter.o
+	gcc $(INCLUDES) -I./src/raster $(CFLAGS) src/raster/raster.c -o objs/raster.o
+	gcc $(INCLUDES) -I./src/sfnt $(CFLAGS) src/sfnt/sfnt.c -o objs/sfnt.o
+	gcc $(INCLUDES) -I./src/bdf $(CFLAGS) src/bdf/bdf.c -o objs/bdf.o
+	gcc $(INCLUDES) $(CFLAGS) src/base/ftdebug.c -o objs/ftdebug.o
+	gcc $(INCLUDES) -I./src/smooth $(CFLAGS) src/smooth/smooth.c -o objs/smooth.o
+
+
+$(STATICLIB): $(OBJECTS)
+	ar cr l_static/libfreetype.a $(OBJECTS)
+
+static: $(STATICLIB)
+
+$(DYNAMICLIB): $(OBJECTS)
+	gcc -shared $(OBJECTS) -o $(DYNAMICLIB)
+
+dynamic: $(DYNAMICLIB)
+	
+blob: static
+
+clean:
+	rm -f objs/*.o 
+	rm -f $(STATICLIB) 
+	rm -f $(DYNAMICLIB)
+
+all: clean static dynamic blob

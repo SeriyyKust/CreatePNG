@@ -1,0 +1,32 @@
+CC=gcc
+STATICLIB=l_static/libz.a
+DYNAMICLIB=l_dynamic/libz.so
+
+SOURCES=$(wildcard *.c)
+OBJECTS = $(SOURCES:.c=.o)
+
+CFLAGS=-fno-stack-protector -fno-exceptions -pie -fPIE -c -O2 -fPIC -w
+
+
+$(STATICLIB): $(OBJECTS)
+	ar rc $(STATICLIB) $(OBJECTS)
+
+static: $(STATICLIB)
+	
+$(DYNAMICLIB): $(OBJECTS)
+	$(CC) -shared $(OBJECTS) -o $(DYNAMICLIB)
+
+dynamic: $(DYNAMICLIB)
+	
+blob: static
+
+clean:
+	rm -f *.o 
+	rm -f $(STATICLIB) 
+	rm -f $(DYNAMICLIB)
+
+all: clean static dynamic blob
+
+
+%.o: %.c
+	$(CC) $(CFLAGS) $< -o $@

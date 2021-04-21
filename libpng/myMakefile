@@ -1,0 +1,32 @@
+CC=gcc
+
+STATICLIB=l_static/libpng.a
+DYNAMICLIB=l_dynamic/libpng.so
+
+CFLAGS=-fno-stack-protector -fno-exceptions -pie -fPIE -c -O2 -fPIC
+
+SOURCES=png.c pngerror.c pngget.c pngmem.c pngpread.c pngread.c pngrio.c pngrtran.c pngrutil.c pngset.c pngtrans.c pngwio.c pngwrite.c pngwtran.c pngwutil.c
+OBJECTS = $(SOURCES:.c=.o)
+
+OBJECT_FILES_ZLIB=../zlib/adler32.o ../zlib/crc32.o ../zlib/deflate.o ../zlib/infback.o ../zlib/inffast.o ../zlib/inflate.o ../zlib/inftrees.o ../zlib/trees.o ../zlib/zutil.o ../zlib/compress.o ../zlib/uncompr.o
+
+.c.o:
+	gcc -I../zlib $(CFLAGS) $< -o $@
+
+$(STATICLIB): $(OBJECTS)
+	ar cr $(STATICLIB) $(OBJECTS)
+
+static: $(STATICLIB)
+
+$(DYNAMICLIB): $(OBJECTS)
+	gcc -shared $(OBJECTS) $(OBJECT_FILES_ZLIB) -o $(DYNAMICLIB)
+
+dynamic: $(DYNAMICLIB)
+
+blob: static
+	
+clean:
+	rm -f *.o $(STATICLIB) $(DYNAMICLIB)
+
+all: clean static dynamic blob
+	
